@@ -70,10 +70,13 @@ function renderBasketIndicator() {
     indicator.className = "basket-indicator";
     basketLink.appendChild(indicator);
   }
-  
+
   // Calculate total quantity of all items
-  const totalQuantity = Object.values(basket).reduce((sum, quantity) => sum + quantity, 0);
-  
+  const totalQuantity = Object.values(basket).reduce(
+    (sum, quantity) => sum + quantity,
+    0
+  );
+
   if (totalQuantity > 0) {
     indicator.textContent = totalQuantity;
     indicator.style.display = "flex";
