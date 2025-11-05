@@ -4,6 +4,65 @@ const PRODUCTS = {
   lemon: { name: "Lemon", emoji: "🍋" },
 };
 
+// Theme Management
+function getStoredTheme() {
+  return localStorage.getItem("theme") || "auto";
+}
+
+function setStoredTheme(theme) {
+  localStorage.setItem("theme", theme);
+}
+
+function getSystemTheme() {
+  return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+}
+
+function applyTheme(theme) {
+  const root = document.documentElement;
+  
+  if (theme === "auto") {
+    const systemTheme = getSystemTheme();
+    root.setAttribute("data-theme", "auto");
+  } else {
+    root.setAttribute("data-theme", theme);
+  }
+  
+  // Update theme icon
+  const themeIcon = document.querySelector(".theme-icon");
+  if (themeIcon) {
+    if (theme === "dark" || (theme === "auto" && getSystemTheme() === "dark")) {
+      themeIcon.textContent = "☀️";
+    } else {
+      themeIcon.textContent = "🌙";
+    }
+  }
+}
+
+function initializeTheme() {
+  const storedTheme = getStoredTheme();
+  const themeSelector = document.getElementById("themeSelector");
+  
+  if (themeSelector) {
+    themeSelector.value = storedTheme;
+    themeSelector.addEventListener("change", (e) => {
+      const selectedTheme = e.target.value;
+      setStoredTheme(selectedTheme);
+      applyTheme(selectedTheme);
+    });
+  }
+  
+  applyTheme(storedTheme);
+  
+  // Listen for system theme changes when in auto mode
+  if (window.matchMedia) {
+    window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", () => {
+      if (getStoredTheme() === "auto") {
+        applyTheme("auto");
+      }
+    });
+  }
+}
+
 function getBasket() {
   try {
     const basket = localStorage.getItem("basket");
@@ -88,8 +147,12 @@ function renderBasketIndicator() {
 // Call this on page load and after basket changes
 if (document.readyState !== "loading") {
   renderBasketIndicator();
+  initializeTheme();
 } else {
-  document.addEventListener("DOMContentLoaded", renderBasketIndicator);
+  document.addEventListener("DOMContentLoaded", () => {
+    renderBasketIndicator();
+    initializeTheme();
+  });
 }
 
 // Patch basket functions to update indicator
